@@ -1,0 +1,354 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container py-4">
+
+    <!-- Welcome Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-primary mb-0">
+                <i class="fas fa-user-circle me-2"></i>Welcome, {{ user.username }}!
+            </h3>
+            <p class="text-muted mb-0">Today is {{ today|date:"F j, Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <i class="fas fa-filter me-2"></i> Filter Statistics
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="class_year_dropdown_filter" class="form-label">Class Year</label>
+                            <select id="class_year_dropdown_filter" name="class_year" class="form-select">
+                                <option value="">All</option>
+                                {% for year in years %}
+                                    <option value="{{ year.id }}" {% if selected_class_year == year.id %}selected{% endif %}>{{ year.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="subject_dropdown_filter" class="form-label">Subject</label>
+                            <select id="subject_dropdown_filter" name="subject" class="form-select">
+                                <option value="">All</option>
+                                {% for sub in subjects %}
+                                    <option value="{{ sub.id }}" {% if selected_subject_id == sub.id %}selected{% endif %}>{{ sub.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle me-1"></i> Apply Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance + Statistics Section -->
+    <div class="row">
+        <!-- Attendance Section -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-camera me-2"></i>Take Attendance
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'generate_qr' %}">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Class-Year</label>
+                                <select class="form-select" name="ClassYears" id="class_year_dropdown_attendance" required>
+                                    <option value="" disabled selected>-- Select Class Year --</option>
+                                    {% for year in years %}
+                                        <option value="{{ year.id }}">{{ year.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Subject</label>
+                                <select class="form-select" name="Subject" id="subject_dropdown_attendance" required>
+                                    <option value="" disabled selected>-- Select Subject --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" name="date" value="{{ today|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                        <input type="hidden" name="latitude" id="latitude" value="18.5204">
+                        <input type="hidden" name="longitude" id="longitude" value="73.8567">
+                        <button type="submit" class="btn btn-primary mt-4">
+                            <i class="fas fa-qrcode me-2"></i>Generate QR
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-chart-bar me-2"></i>Statistics
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="border-bottom pb-2">
+                            <small class="text-muted">Total Students</small>
+                            <h4 class="mb-0" id="total_students">{{ total_students }}</h4>
+                        </div>
+                        <div class="border-bottom pb-2">
+                            <small class="text-muted">Present Today</small>
+                            <h4 class="mb-0" id="present_today">{{ present_today }}</h4>
+                        </div>
+                        <div>
+                            <small class="text-muted">Attendance Rate</small>
+                            <h4 class="mb-0" id="attendance_rate">{{ attendance_percent }}%</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Records Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-list-alt me-2"></i>Attendance Records
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subject</th>
+                            <th>Class</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in attendance_records %}
+                        <tr>
+                            <td>{{ record.date|date:"Y-m-d" }}</td>
+                            <td>{{ record.subject }}</td>
+                            <td>{{ record.class_year }}</td>
+                            <td>{{ record.present_count }}</td>
+                            <td>{{ record.absent_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export & Profile Section -->
+    <div class="d-flex gap-2 mb-4">
+        <a href="{% url 'export_attendance' %}" class="btn btn-outline-success">
+            <i class="fas fa-file-excel me-2"></i>Export Excel
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-user-circle fs-4 me-2"></i>
+                <span>{{ user.username }}</span>
+            </div>
+            <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 🔁 Dependent Subject Dropdown Script for Statistics Filter -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const classDropdownFilter = document.getElementById('class_year_dropdown_filter');
+        const subjectDropdownFilter = document.getElementById('subject_dropdown_filter');
+
+        classDropdownFilter.addEventListener('change', function () {
+            const classYearId = this.value;
+            subjectDropdownFilter.innerHTML = '<option disabled selected>Loading...</option>';
+
+            fetch(`/ajax/get-subjects/?class_year_id=${classYearId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subjectDropdownFilter.innerHTML = '<option value="">-- Select Subject --</option>';
+                    if (data.length === 0) {
+                        subjectDropdownFilter.innerHTML += '<option disabled>No subjects found</option>';
+                    } else {
+                        data.forEach(subject => {
+                            const option = document.createElement('option');
+                            option.value = subject.id;
+                            option.text = subject.name;
+                            subjectDropdownFilter.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading subjects:", error);
+                    subjectDropdownFilter.innerHTML = '<option disabled>Error loading subjects</option>';
+                });
+        });
+    });
+</script>
+
+<!-- 🔁 Dependent Subject Dropdown Script for Attendance Section -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const classDropdownAttendance = document.getElementById('class_year_dropdown_attendance');
+        const subjectDropdownAttendance = document.getElementById('subject_dropdown_attendance');
+
+        classDropdownAttendance.addEventListener('change', function () {
+            const classYearId = this.value;
+            subjectDropdownAttendance.innerHTML = '<option disabled selected>Loading...</option>';
+
+            fetch(`/ajax/get-subjects/?class_year_id=${classYearId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subjectDropdownAttendance.innerHTML = '<option value="">-- Select Subject --</option>';
+                    if (data.length === 0) {
+                        subjectDropdownAttendance.innerHTML += '<option disabled>No subjects found</option>';
+                    } else {
+                        data.forEach(subject => {
+                            const option = document.createElement('option');
+                            option.value = subject.id;
+                            option.text = subject.name;
+                            subjectDropdownAttendance.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading subjects:", error);
+                    subjectDropdownAttendance.innerHTML = '<option disabled>Error loading subjects</option>';
+                });
+        });
+    });
+</script>
+
+<!-- JavaScript for Dynamic Statistics Update -->
+<script>
+    function updateStatistics() {
+        fetch('/ajax/get-statistics/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total_students').innerText = data.total_students;
+                document.getElementById('present_today').innerText = data.present_today;
+                document.getElementById('attendance_rate').innerText = data.attendance_rate + '%';
+            })
+            .catch(error => {
+                console.error("Error loading statistics:", error);
+            });
+    }
+
+    // Call updateStatistics on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        updateStatistics();
+    });
+</script>
+
+<style>
+/* Modern Dashboard Styles */
+.welcome-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-left: 4px solid #0d6efd;
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.stats-item {
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
+}
+
+.stats-item:hover {
+    background: rgba(13, 110, 253, 0.04);
+    transform: translateY(-2px);
+}
+
+.custom-select, .custom-input {
+    border-radius: 0.5rem;
+    padding: 0.625rem 1rem;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.custom-select:focus, .custom-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    border-color: #0d6efd;
+}
+
+.custom-btn {
+    border-radius: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.custom-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-table {
+    margin-bottom: 0;
+}
+
+.custom-table thead th {
+    background-color: rgba(0, 0, 0, 0.02);
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.custom-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .stats-item {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}

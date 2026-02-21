@@ -1,0 +1,92 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0">Welcome Back!</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-person-circle text-primary" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                        </svg>
+                    </div>
+
+                    <form method="POST" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form.username }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                {{ form.password }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success mt-3" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Don't have an account? 
+                            <a href="{% url 'register' %}" class="text-primary fw-bold text-decoration-none">Register here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+    }
+    .input-group-text {
+        border-radius: 0.5rem 0 0 0.5rem;
+        background-color: #f8f9fa;
+    }
+    .form-control {
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
+    .card {
+        border-radius: 1rem;
+        border: none;
+    }
+    .card-header {
+        border-radius: 1rem 1rem 0 0 !important;
+    }
+    .btn {
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+    .alert {
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}

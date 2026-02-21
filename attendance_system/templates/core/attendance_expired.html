@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Expired{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Attendance Expired</h4>
+        <p>The QR code for attendance has expired. Please contact the teacher to generate a new QR code.</p>
+        <hr>
+        <p class="mb-0">You will not be able to mark attendance with the expired QR code.</p>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary">Back to Teacher Dashboard</a>
+</div>
+{% endblock %}

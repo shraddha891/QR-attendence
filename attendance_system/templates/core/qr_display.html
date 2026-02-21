@@ -1,0 +1,202 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="qr-card">
+        <div class="qr-header">
+            <h2>QR Code for Attendance</h2>
+            <div class="timer-badge">
+                <i class="fas fa-clock"></i> Expires in: <span id="countdown"></span>
+            </div>
+            <script>
+              let timer = null;
+          
+              function startCountdown() {
+                  const expiresIn = 1 * 60;  // 5 minutes
+                  let remaining = expiresIn;
+          
+                  if (timer) {
+                      clearInterval(timer);
+                  }
+          
+                  const countdownEl = document.getElementById("countdown");
+          
+                  function updateCountdown() {
+                      if (remaining <= 0) {
+                          countdownEl.innerText = "Expired";
+                          clearInterval(timer);
+          
+                          const qrImage = document.querySelector('.qr-image');
+                          if (qrImage) {
+                              qrImage.style.filter = 'blur(3px)';
+                              qrImage.style.opacity = '0.5';
+                          }
+          
+                          // Show expired message
+                          const expiredMsg = document.createElement("p");
+                          expiredMsg.innerText = "⏱️ This QR code has expired. Please generate a new one.";
+                          expiredMsg.style.color = "red";
+                          expiredMsg.style.marginTop = "1rem";
+                          expiredMsg.style.fontWeight = "bold";
+                          document.querySelector(".qr-image-wrapper").appendChild(expiredMsg);
+          
+                          return;
+                      }
+          
+                      const minutes = Math.floor(remaining / 60);
+                      const seconds = remaining % 60;
+                      countdownEl.innerText = `${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s`;
+                      remaining--;
+                  }
+          
+                  updateCountdown();
+                  timer = setInterval(updateCountdown, 1000);
+              }
+          
+              // Start countdown automatically after page loads
+              window.onload = startCountdown;
+          </script>
+          
+        </div>
+
+        <div class="qr-content">
+            <div class="qr-instruction">
+                <i class="fas fa-qrcode"></i>
+                <p>Scan the QR code below to mark attendance for the selected session.</p>
+            </div>
+
+            <div class="qr-image-wrapper">
+                <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code" class="qr-image">
+            </div>
+
+            <div class="scan-url">
+                <span class="url-label">Scan URL:</span>
+                <a href="{{ scan_url }}" target="_blank" class="url-link">{{ scan_url }}</a>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'dashboard' %}" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .qr-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 600px;
+        margin: 3rem auto;
+    }
+
+    .qr-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .qr-header h2 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 1.8rem;
+    }
+
+    .timer-badge {
+        background: #f8f9fa;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .qr-content {
+        text-align: center;
+    }
+
+    .qr-instruction {
+        margin-bottom: 2rem;
+        color: #6c757d;
+    }
+
+    .qr-instruction i {
+        font-size: 2rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+
+    .qr-image-wrapper {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .qr-image {
+        max-width: 250px;
+        height: auto;
+    }
+
+    .scan-url {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .url-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 1rem;
+    }
+
+    .url-link {
+        color: #007bff;
+        text-decoration: none;
+        word-break: break-all;
+    }
+
+    .url-link:hover {
+        text-decoration: underline;
+    }
+
+    .action-buttons {
+        text-align: center;
+    }
+
+    .btn-back {
+        background: #007bff;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .qr-card {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .qr-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .timer-badge {
+            margin-top: 1rem;
+        }
+    }
+</style>
+{% endblock %}

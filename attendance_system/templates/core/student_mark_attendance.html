@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-clipboard-check me-2"></i>Mark Your Attendance
+        </div>
+        <div class="card-body">
+            <p><strong>Subject:</strong> {{ session.subject.name }}</p>
+            <p><strong>Class:</strong> {{ session.class_year.name }}</p>
+            <p><strong>Date:</strong> 
+                {% if session.date %}
+                    {{ session.date|date:"F d, Y" }}
+                {% else %}
+                    Today's Date
+                {% endif %}
+            </p>
+
+            <form method="POST" id="attendanceForm">
+                {% csrf_token %}
+                <input type="hidden" name="token" value="{{ session.token }}">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" name="name" id="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="roll_number" class="form-label">Roll Number</label>
+                    <input type="text" class="form-control" name="roll_number" id="roll_number" required>
+                </div>
+                
+                <input type="hidden" name="latitude" value="{{ request.GET.latitude }}">
+                <input type="hidden" name="longitude" value="{{ request.GET.longitude }}">
+              
+                <button type="submit" class="btn btn-success" id="submitBtn">
+                    <i class="fas fa-check-circle me-2"></i>Submit Attendance
+                </button>
+            </form>
+            <!-- <script> -->
+                <!-- // document.getElementById('attendanceForm').onsubmit = function() { -->
+                    <!-- Disable the submit button to prevent multiple submissions -->
+                    <!-- // document.getElementById('submitBtn').disabled = true; -->
+                    <!-- Optionally, you can change the button text to indicate submission -->
+                    <!-- // document.getElementById('submitBtn').innerText = 'Submitting...'; -->
+                <!-- // }; -->
+            <!-- // </script> -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
